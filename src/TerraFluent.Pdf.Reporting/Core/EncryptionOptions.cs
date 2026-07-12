@@ -1,0 +1,93 @@
+namespace TerraFluent.Pdf.Reporting.Core;
+
+/// <summary>Encryption algorithm used by the PDF Standard Security Handler.</summary>
+public enum EncryptionAlgorithm
+{
+    /// <summary>
+    /// AES-256 with Standard Security Handler revision 6 (ISO 32000-2 / PDF 2.0).
+    /// SHA-2 based key derivation; the modern default.  Supported by every
+    /// mainstream viewer since ~2010 (Adobe Acrobat 9+, Chrome, Edge, Firefox,
+    /// Preview, Foxit, Okular, …).
+    /// </summary>
+    Aes256,
+
+    /// <summary>
+    /// AES-128 with Standard Security Handler revision 4 (PDF 1.6+).
+    /// Uses the legacy MD5/RC4-based key-derivation chain; choose this only
+    /// when documents must open in very old viewers (pre-2008).
+    /// </summary>
+    Aes128,
+}
+
+/// <summary>
+/// Configuration for PDF encryption.  Pass an instance to
+/// <c>container.Encrypt(options)</c> inside <c>PdfDocument.Create</c>.
+/// </summary>
+/// <remarks>
+/// TerraFluent.Pdf.Reporting uses the <b>PDF Standard Security Handler revision 4 with AES-128</b>
+/// (PDF 1.7 §7.6.5).  This is supported by every major PDF viewer
+/// (Adobe Acrobat, Chrome, Edge, Firefox, Preview, Foxit, Okular, …).
+///
+/// <para>
+/// <b>Passwords:</b> Either or both passwords may be set.
+/// <list type="bullet">
+///   <item>
+///     <b>User password</b> — required to open the document in a viewer.
+///     Leave <c>null</c> or empty to allow opening without a password (but still
+///     encrypt the content so that copy/print restrictions are enforced).
+///   </item>
+///   <item>
+///     <b>Owner password</b> — grants full access, bypassing all permission
+///     restrictions.  Defaults to a random value when not set so that the
+///     encryption dictionary is still valid.
+///   </item>
+/// </list>
+/// </para>
+/// </remarks>
+/// <example>
+/// <code>
+/// PdfDocument.Create(container =>
+/// {
+///     container.Encrypt(new EncryptionOptions
+///     {
+///         UserPassword  = "open123",
+///         OwnerPassword = "admin456",
+///         Permissions   = PdfPermissions.Print | PdfPermissions.CopyText,
+///     });
+///     container.Page(page => { /* … */ });
+/// })
+/// .PublishPdf("protected.pdf");
+/// </code>
+/// </example>
+public sealed class EncryptionOptions
+{
+    /// <summary>
+    /// Password required to <em>open</em> the document.
+    /// <c>null</c> or empty string means the document opens without a password
+    /// (encryption is still applied and permissions are still enforced).
+    /// </summary>
+    public string? UserPassword { get; set; }
+
+    /// <summary>
+    /// Password that grants <em>full</em> (unrestricted) access to the document,
+    /// bypassing the <see cref="Permissions"/> restrictions.
+    /// When <c>null</c> or empty a random 16-byte owner password is generated
+    /// automatically so that the encryption dictionary is always valid.
+    /// </summary>
+    public string? OwnerPassword { get; set; }
+
+    /// <summary>
+    /// Bitwise combination of <see cref="PdfPermissions"/> flags that controls
+    /// what a user who opens the document with the <see cref="UserPassword"/>
+    /// may do.  Defaults to <see cref="PdfPermissions.All"/>.
+    /// </summary>
+    public PdfPermissions Permissions { get; set; } = PdfPermissions.All;
+
+    /// <summary>
+    /// Encryption algorithm.  Defaults to <see cref="EncryptionAlgorithm.Aes256"/>
+    /// (Standard Security Handler revision 6, PDF 2.0).  Set to
+    /// <see cref="EncryptionAlgorithm.Aes128"/> only when documents must open in
+    /// very old viewers.
+    /// </summary>
+    public EncryptionAlgorithm Algorithm { get; set; } = EncryptionAlgorithm.Aes256;
+}

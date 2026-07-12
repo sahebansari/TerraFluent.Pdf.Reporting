@@ -1,0 +1,808 @@
+using TerraFluent.Pdf.Reporting.Barcodes;
+using TerraFluent.Pdf.Reporting.Elements;
+using TerraFluent.Pdf.Reporting.Infra;
+using TerraFluent.Pdf.Reporting.Helpers;
+
+namespace TerraFluent.Pdf.Reporting.Core;
+
+/// <summary>
+/// Extension methods on <see cref="IContainer"/> that mirror the fluent API.
+/// Every method creates an element, attaches it to the container, and returns either
+/// a new <see cref="IContainer"/> (for further decoration) or a specific descriptor.
+/// </summary>
+public static class ContainerExtensions
+{
+    // -- Internal helpers ------------------------------------------
+
+    // Casts IContainer to the concrete Container type; throws if the caller
+    // passed a foreign IContainer implementation not produced by this library.
+    private static Container Slot(this IContainer c) =>
+        c as Container
+            ?? throw new InvalidOperationException(
+                $"IContainer implementation {c.GetType().Name} is not a Container. " +
+                "Only containers returned by the TerraFluent.Pdf.Reporting API support chaining.");
+
+    // Attaches `element` as the container's child and returns `inner` as the next
+    // chaining target (decorator pattern: outer wraps inner, caller writes to inner).
+    private static Container SetAndReturnInner(this IContainer container, Element element, Container inner)
+    {
+        container.Slot().Child = element;
+        return inner;
+    }
+
+    // -- Text ------------------------------------------------------
+
+    /// <summary>
+    /// Places a text element with a single literal string.
+    /// Empty or whitespace-only strings render as an empty block, so dynamic
+    /// data (e.g. an empty table cell value) never needs a caller-side guard.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="text"/> is <c>null</c>.</exception>
+    public static TextDescriptor Text(this IContainer container, string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        var element = new TextBlock(text);
+        container.Slot().Child = element;
+        return new TextDescriptor(element);
+    }
+
+    /// <summary>Places a text element composed from multiple spans.</summary>
+    /// <exception cref="ArgumentNullException"><paramref name="compose"/> is <c>null</c>.</exception>
+    public static TextDescriptor Text(this IContainer container, Action<TextDescriptor> compose)
+    {
+        ArgumentNullException.ThrowIfNull(compose);
+        var element    = new TextBlock();
+        var descriptor = new TextDescriptor(element);
+        compose(descriptor);
+        container.Slot().Child = element;
+        return descriptor;
+    }
+
+    // -- Layout ----------------------------------------------------
+
+    /// <summary>Places a vertical column layout.</summary>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <c>null</c>.</exception>
+    public static IContainer Column(this IContainer container, Action<ColumnDescriptor> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var element    = new Column();
+        var descriptor = new ColumnDescriptor(element);
+        configure(descriptor);
+        container.Slot().Child = element;
+        return container;
+    }
+
+    /// <summary>Places a horizontal row layout.</summary>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <c>null</c>.</exception>
+    public static IContainer Row(this IContainer container, Action<RowDescriptor> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var element    = new Row();
+        var descriptor = new RowDescriptor(element);
+        configure(descriptor);
+        container.Slot().Child = element;
+        return container;
+    }
+
+    /// <summary>Places a table layout.</summary>
+    /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <c>null</c>.</exception>
+    public static IContainer Table(this IContainer container, Action<TableDescriptor> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+        var element    = new Table();
+        var descriptor = new TableDescriptor(element);
+        configure(descriptor);
+        container.Slot().Child = element;
+        return container;
+    }
+
+    // -- Decorators (return new inner slot for chaining) -----------
+
+    /// <summary>Adds equal padding on all sides.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer Padding(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Padding { Top = value, Right = value, Bottom = value, Left = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds padding using a specified unit.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer Padding(this IContainer container, double value, Unit unit)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        double pt = UnitConversion.ToPoints(value, unit);
+        return container.Padding(pt);
+    }
+
+    /// <summary>Adds vertical (top + bottom) padding.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer PaddingVertical(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Padding { Top = value, Bottom = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds vertical padding using a specified unit.</summary>
+    public static IContainer PaddingVertical(this IContainer container, double value, Unit unit) =>
+        container.PaddingVertical(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Adds horizontal (left + right) padding.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer PaddingHorizontal(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Padding { Left = value, Right = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds horizontal padding using a specified unit.</summary>
+    public static IContainer PaddingHorizontal(this IContainer container, double value, Unit unit) =>
+        container.PaddingHorizontal(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Adds padding only to the top.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer PaddingTop(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Padding { Top = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds padding only to the bottom.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer PaddingBottom(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Padding { Bottom = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds padding only to the left.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer PaddingLeft(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Padding { Left = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds padding only to the right.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer PaddingRight(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Padding { Right = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    // -- Margin ----------------------------------------------------
+
+    /// <summary>
+    /// Adds equal margin on all sides.
+    /// Margin is <em>outer</em> spacing: any Background or Border applied after this
+    /// call renders inside the already-reduced area, leaving the margin region transparent.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer Margin(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Margin { Top = value, Right = value, Bottom = value, Left = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds equal margin on all sides using a specified unit.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer Margin(this IContainer container, double value, Unit unit)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        double pt = UnitConversion.ToPoints(value, unit);
+        return container.Margin(pt);
+    }
+
+    /// <summary>Adds vertical (top + bottom) margin.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer MarginVertical(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Margin { Top = value, Bottom = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds vertical margin using a specified unit.</summary>
+    public static IContainer MarginVertical(this IContainer container, double value, Unit unit) =>
+        container.MarginVertical(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Adds horizontal (left + right) margin.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer MarginHorizontal(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Margin { Left = value, Right = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds horizontal margin using a specified unit.</summary>
+    public static IContainer MarginHorizontal(this IContainer container, double value, Unit unit) =>
+        container.MarginHorizontal(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Adds margin only to the top.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer MarginTop(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Margin { Top = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds margin only to the top using a specified unit.</summary>
+    public static IContainer MarginTop(this IContainer container, double value, Unit unit) =>
+        container.MarginTop(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Adds margin only to the bottom.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer MarginBottom(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Margin { Bottom = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds margin only to the bottom using a specified unit.</summary>
+    public static IContainer MarginBottom(this IContainer container, double value, Unit unit) =>
+        container.MarginBottom(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Adds margin only to the left.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer MarginLeft(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Margin { Left = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds margin only to the left using a specified unit.</summary>
+    public static IContainer MarginLeft(this IContainer container, double value, Unit unit) =>
+        container.MarginLeft(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Adds margin only to the right.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is negative.</exception>
+    public static IContainer MarginRight(this IContainer container, double value)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(value);
+        var element = new Margin { Right = value };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Adds margin only to the right using a specified unit.</summary>
+    public static IContainer MarginRight(this IContainer container, double value, Unit unit) =>
+        container.MarginRight(UnitConversion.ToPoints(value, unit));
+
+    /// <summary>Fills the background with the given hex colour.</summary>
+    /// <exception cref="ArgumentException"><paramref name="hexColor"/> is null or whitespace.</exception>
+    public static IContainer Background(this IContainer container, string hexColor)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        var element = new Background { Color = PdfColor.FromHex(hexColor) };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Draws a border of the given width and colour.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="lineWidth"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hexColor"/> is null or whitespace.</exception>
+    public static IContainer Border(this IContainer container, double lineWidth, string hexColor)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineWidth);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        var element = new Border
+        {
+            LineWidth = lineWidth,
+            Color     = PdfColor.FromHex(hexColor),
+        };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Draws a border using the default colour (black).</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="lineWidth"/> is zero or negative.</exception>
+    public static IContainer Border(this IContainer container, double lineWidth = 1) =>
+        container.Border(lineWidth, "#000000");
+
+    // -- Rounded border --------------------------------------------
+
+    /// <summary>
+    /// Draws a rounded-corner border around the child content.
+    /// </summary>
+    /// <param name="container">The container slot to decorate.</param>
+    /// <param name="radius">Corner radius in PDF points. Clamped to half the shorter side automatically.</param>
+    /// <param name="lineWidth">Stroke width in PDF points.</param>
+    /// <param name="hexColor">Border colour as a hex string (e.g. <c>"#1a4a8a"</c> or <c>Color.Blue.Darken2</c>). Defaults to black.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="radius"/> or <paramref name="lineWidth"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hexColor"/> is null or whitespace.</exception>
+    public static IContainer RoundedBorder(this IContainer container,
+        double radius = 8, double lineWidth = 1, string hexColor = "#000000")
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(radius);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineWidth);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        var element = new RoundedBorder
+        {
+            Radius    = radius,
+            LineWidth = lineWidth,
+            Color     = PdfColor.FromHex(hexColor),
+        };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>
+    /// Draws a filled rounded-corner box (background + border) around the child content.
+    /// </summary>
+    /// <param name="container">The container slot to decorate.</param>
+    /// <param name="radius">Corner radius in PDF points.</param>
+    /// <param name="fillHexColor">Fill colour as a hex string.</param>
+    /// <param name="borderHexColor">Border colour as a hex string. Defaults to black.</param>
+    /// <param name="lineWidth">Stroke width in PDF points.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="radius"/> or <paramref name="lineWidth"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentException">Any colour argument is null or whitespace.</exception>
+    public static IContainer RoundedBox(this IContainer container,
+        double radius = 8, string fillHexColor = "#FFFFFF",
+        string borderHexColor = "#000000", double lineWidth = 1)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(radius);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineWidth);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fillHexColor);
+        ArgumentException.ThrowIfNullOrWhiteSpace(borderHexColor);
+        var element = new RoundedBorder
+        {
+            Radius    = radius,
+            LineWidth = lineWidth,
+            Color     = PdfColor.FromHex(borderHexColor),
+            FillColor = PdfColor.FromHex(fillHexColor),
+        };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    // -- Partial (per-edge) borders --------------------------------
+
+    /// <summary>Draws a border only on the top edge.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="lineWidth"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hexColor"/> is null or whitespace.</exception>
+    public static IContainer BorderTop(this IContainer container, double lineWidth, string hexColor = "#000000")
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineWidth);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        var element = new PartialBorder { TopWidth = lineWidth, TopColor = PdfColor.FromHex(hexColor) };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Draws a border only on the bottom edge.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="lineWidth"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hexColor"/> is null or whitespace.</exception>
+    public static IContainer BorderBottom(this IContainer container, double lineWidth, string hexColor = "#000000")
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineWidth);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        var element = new PartialBorder { BottomWidth = lineWidth, BottomColor = PdfColor.FromHex(hexColor) };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Draws a border only on the left edge.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="lineWidth"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hexColor"/> is null or whitespace.</exception>
+    public static IContainer BorderLeft(this IContainer container, double lineWidth, string hexColor = "#000000")
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineWidth);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        var element = new PartialBorder { LeftWidth = lineWidth, LeftColor = PdfColor.FromHex(hexColor) };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Draws a border only on the right edge.</summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="lineWidth"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentException"><paramref name="hexColor"/> is null or whitespace.</exception>
+    public static IContainer BorderRight(this IContainer container, double lineWidth, string hexColor = "#000000")
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(lineWidth);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        var element = new PartialBorder { RightWidth = lineWidth, RightColor = PdfColor.FromHex(hexColor) };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    // -- Alignment -------------------------------------------------
+
+    /// <summary>Horizontally centres the child within the available width.</summary>
+    public static IContainer AlignCenter(this IContainer container)
+    {
+        var element = new Alignment { Horizontal = HorizontalAlignment.Center };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Aligns the child to the right.</summary>
+    public static IContainer AlignRight(this IContainer container)
+    {
+        var element = new Alignment { Horizontal = HorizontalAlignment.Right };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Aligns the child to the left (default).</summary>
+    public static IContainer AlignLeft(this IContainer container)
+    {
+        var element = new Alignment { Horizontal = HorizontalAlignment.Left };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Vertically centres the child within the available height.</summary>
+    public static IContainer AlignMiddle(this IContainer container)
+    {
+        var element = new Alignment { Vertical = VerticalAlignment.Middle };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    /// <summary>Aligns the child to the bottom of the available height.</summary>
+    public static IContainer AlignBottom(this IContainer container)
+    {
+        var element = new Alignment { Vertical = VerticalAlignment.Bottom };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    // -- Lines -----------------------------------------------------
+
+    /// <summary>Places a horizontal rule line.</summary>
+    public static IContainer LineHorizontal(this IContainer container,
+        double lineWidth = 1, string hexColor = "#000000")
+    {
+        container.Slot().Child = new Line
+        {
+            Vertical  = false,
+            LineWidth = lineWidth,
+            Color     = PdfColor.FromHex(hexColor),
+        };
+        return container;
+    }
+
+    /// <summary>Places a vertical rule line.</summary>
+    public static IContainer LineVertical(this IContainer container,
+        double lineWidth = 1, string hexColor = "#000000")
+    {
+        container.Slot().Child = new Line
+        {
+            Vertical  = true,
+            LineWidth = lineWidth,
+            Color     = PdfColor.FromHex(hexColor),
+        };
+        return container;
+    }
+
+    // -- Component -------------------------------------------------
+
+    /// <summary>Injects a reusable <see cref="IComponent"/> into this slot.</summary>
+    /// <exception cref="ArgumentNullException"><paramref name="component"/> is <c>null</c>.</exception>
+    public static IContainer Component(this IContainer container, IComponent component)
+    {
+        ArgumentNullException.ThrowIfNull(component);
+        component.Compose(container);
+        return container;
+    }
+
+    // -- Image -----------------------------------------------------
+
+    /// <summary>
+    /// Places a PNG or JPEG image.
+    /// The image scales to fill the available width while preserving its aspect ratio.
+    /// Supports .png, .jpg, and .jpeg files.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="filePath"/> is null or whitespace.</exception>
+    public static IContainer Image(this IContainer container, string filePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+        container.Slot().Child = new ImageElement(filePath);
+        return container;
+    }
+
+    /// <summary>
+    /// Places a PNG or JPEG image constrained to <paramref name="width"/> PDF points.
+    /// The image will not exceed this width; wrap in <c>AlignCenter()</c> or <c>AlignRight()</c>
+    /// to position it within the available space.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="filePath"/> is null or whitespace.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="width"/> is zero or negative.</exception>
+    public static IContainer Image(this IContainer container, string filePath, double width)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        container.Slot().Child = new ImageElement(filePath, width);
+        return container;
+    }
+
+    /// <summary>
+    /// Places a PNG or JPEG image from raw file bytes (format detected from the
+    /// data's magic bytes). The image scales to fill the available width while
+    /// preserving its aspect ratio.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="imageData"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="imageData"/> is empty.</exception>
+    public static IContainer Image(this IContainer container, byte[] imageData)
+    {
+        ArgumentNullException.ThrowIfNull(imageData);
+        if (imageData.Length == 0)
+            throw new ArgumentException("Image data must not be empty.", nameof(imageData));
+        container.Slot().Child = new ImageElement(imageData);
+        return container;
+    }
+
+    /// <summary>
+    /// Places a PNG or JPEG image from raw file bytes, constrained to
+    /// <paramref name="width"/> PDF points.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="imageData"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException"><paramref name="imageData"/> is empty.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="width"/> is zero or negative.</exception>
+    public static IContainer Image(this IContainer container, byte[] imageData, double width)
+    {
+        ArgumentNullException.ThrowIfNull(imageData);
+        if (imageData.Length == 0)
+            throw new ArgumentException("Image data must not be empty.", nameof(imageData));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        container.Slot().Child = new ImageElement(imageData, width);
+        return container;
+    }
+
+    /// <summary>
+    /// Places a PNG or JPEG image read from a stream (format detected from the
+    /// data's magic bytes). The stream is read to the end; the caller retains
+    /// ownership and must dispose it.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="imageStream"/> is <c>null</c>.</exception>
+    public static IContainer Image(this IContainer container, Stream imageStream)
+    {
+        ArgumentNullException.ThrowIfNull(imageStream);
+        return container.Image(ReadAllBytes(imageStream));
+    }
+
+    /// <summary>
+    /// Places a PNG or JPEG image read from a stream, constrained to
+    /// <paramref name="width"/> PDF points.
+    /// </summary>
+    /// <exception cref="ArgumentNullException"><paramref name="imageStream"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="width"/> is zero or negative.</exception>
+    public static IContainer Image(this IContainer container, Stream imageStream, double width)
+    {
+        ArgumentNullException.ThrowIfNull(imageStream);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        return container.Image(ReadAllBytes(imageStream), width);
+    }
+
+    private static byte[] ReadAllBytes(Stream stream)
+    {
+        using var ms = new MemoryStream();
+        stream.CopyTo(ms);
+        return ms.ToArray();
+    }
+
+    // -- Barcode -----------------------------------------------------
+
+    /// <summary>
+    /// Places a Code128 (Subset B) barcode encoding <paramref name="data"/>.
+    /// Bars are drawn as vector rectangles, so the barcode stays crisp at any zoom.
+    /// </summary>
+    /// <param name="container">The container slot to attach the barcode to.</param>
+    /// <param name="data">Text to encode. Must be printable ASCII (0x20-0x7E).</param>
+    /// <param name="width">Total rendered width in PDF points, including the quiet zone.
+    ///   When <c>null</c> the barcode fills the available width.</param>
+    /// <param name="height">Bar height in PDF points (excludes the optional caption).</param>
+    /// <param name="hexColor">Bar (and caption text) colour. Defaults to black.</param>
+    /// <param name="backgroundHexColor">Background colour behind the bars. Defaults to white.</param>
+    /// <param name="showCaption">When <c>true</c>, renders <paramref name="data"/> as a centred caption below the bars.</param>
+    /// <param name="quietZoneModules">Blank margin on each side, in barcode modules. The Code128 spec recommends at least 10.</param>
+    /// <exception cref="ArgumentException"><paramref name="data"/> or a colour argument is null or whitespace.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="width"/> or <paramref name="height"/> is zero or negative.</exception>
+    /// <exception cref="NotSupportedException"><paramref name="data"/> contains a character outside printable ASCII.</exception>
+    public static IContainer Barcode(this IContainer container, string data,
+        double? width = null, double height = 40,
+        string hexColor = "#000000", string backgroundHexColor = "#FFFFFF",
+        bool showCaption = false, double quietZoneModules = 10)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(data);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        ArgumentException.ThrowIfNullOrWhiteSpace(backgroundHexColor);
+        if (width.HasValue) ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width.Value);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+        ArgumentOutOfRangeException.ThrowIfNegative(quietZoneModules);
+        container.Slot().Child = new BarcodeElement(data, width, height,
+            PdfColor.FromHex(hexColor), PdfColor.FromHex(backgroundHexColor), showCaption, quietZoneModules);
+        return container;
+    }
+
+    // -- QR code -------------------------------------------------------
+
+    /// <summary>
+    /// Places a QR code encoding <paramref name="data"/> (ISO/IEC 18004, byte mode).
+    /// Modules are drawn as vector rectangles, so the code stays crisp at any zoom.
+    /// </summary>
+    /// <param name="container">The container slot to attach the QR code to.</param>
+    /// <param name="data">Text to encode as UTF-8 bytes.</param>
+    /// <param name="size">Side length in PDF points. When <c>null</c> the QR code fills
+    ///   the available width (capped by the available height so it stays square).</param>
+    /// <param name="level">Error correction level. Higher levels tolerate more damage/occlusion at the cost of a denser code.</param>
+    /// <param name="hexColor">Module colour. Defaults to black.</param>
+    /// <param name="backgroundHexColor">Background colour (including the quiet zone). Defaults to white.</param>
+    /// <param name="quietZoneModules">Blank margin on each side, in QR modules. The spec recommends at least 4.</param>
+    /// <exception cref="ArgumentException"><paramref name="data"/> or a colour argument is null or whitespace.</exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="size"/> is zero or negative, or <paramref name="quietZoneModules"/> is negative.</exception>
+    /// <exception cref="NotSupportedException"><paramref name="data"/> is too long to fit any QR version at the requested error correction level.</exception>
+    public static IContainer QrCode(this IContainer container, string data,
+        double? size = null, QrErrorCorrectionLevel level = QrErrorCorrectionLevel.M,
+        string hexColor = "#000000", string backgroundHexColor = "#FFFFFF",
+        int quietZoneModules = 4)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(data);
+        ArgumentException.ThrowIfNullOrWhiteSpace(hexColor);
+        ArgumentException.ThrowIfNullOrWhiteSpace(backgroundHexColor);
+        if (size.HasValue) ArgumentOutOfRangeException.ThrowIfNegativeOrZero(size.Value);
+        ArgumentOutOfRangeException.ThrowIfNegative(quietZoneModules);
+        container.Slot().Child = new QrCodeElement(data, level, size,
+            PdfColor.FromHex(hexColor), PdfColor.FromHex(backgroundHexColor), quietZoneModules);
+        return container;
+    }
+
+    // -- Show-if ---------------------------------------------------
+
+    /// <summary>Renders child content only when <paramref name="condition"/> is <c>true</c>.</summary>
+    public static IContainer ShowIf(this IContainer container, bool condition)
+    {
+        if (!condition)
+        {
+            container.Slot().Child = new Empty();
+        }
+        return container;
+    }
+
+    // -- Page break ------------------------------------------------
+
+    /// <summary>
+    /// Places an explicit page-break marker in this container slot.
+    /// When the slot is a direct child of a <c>Column</c>, the pagination engine
+    /// starts a new PDF page at this position.
+    /// If the break falls at the very start of a page it is silently skipped.
+    /// </summary>
+    public static IContainer PageBreak(this IContainer container)
+    {
+        container.Slot().Child = new PageBreak();
+        return container;
+    }
+
+    // -- Bookmark anchor -------------------------------------------
+
+    /// <summary>
+    /// Marks the child content as a bookmark (PDF outline) destination.  The
+    /// target page number and vertical position are resolved automatically when
+    /// the document is rendered — unlike the document-level
+    /// <c>Bookmark(title, pageNumber)</c> API, no page number is supplied.
+    /// Nest entries by passing the <paramref name="parentTitle"/> of a
+    /// previously anchored (or manually added) bookmark.
+    /// </summary>
+    /// <exception cref="ArgumentException"><paramref name="title"/> is null or whitespace.</exception>
+    public static IContainer Bookmark(this IContainer container, string title, string? parentTitle = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(title);
+        var element = new BookmarkAnchorElement { Title = title, ParentTitle = parentTitle };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    // -- Hyperlink -------------------------------------------------
+
+    /// <summary>
+    /// Wraps child content in a clickable PDF URI annotation.
+    /// Clicking the rendered area in a PDF viewer navigates to <paramref name="url"/>.
+    /// </summary>
+    /// <param name="container">The container slot to attach the hyperlink to.</param>
+    /// <param name="url">The destination URI, e.g. <c>"https://example.com"</c>.</param>
+    /// <exception cref="ArgumentException"><paramref name="url"/> is null or whitespace.</exception>
+    public static IContainer Hyperlink(this IContainer container, string url)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(url);
+        var element = new Link { Url = url };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+
+    // -- Headings --------------------------------------------------
+
+    /// <summary>Adds a level-1 heading (largest, bold). Suitable for document title or chapter titles.</summary>
+    public static TextDescriptor H1(this IContainer container, string text) => Heading(container, 1, text);
+
+    /// <summary>Adds a level-2 heading (large, bold).</summary>
+    public static TextDescriptor H2(this IContainer container, string text) => Heading(container, 2, text);
+
+    /// <summary>Adds a level-3 heading (medium, bold).</summary>
+    public static TextDescriptor H3(this IContainer container, string text) => Heading(container, 3, text);
+
+    /// <summary>Adds a level-4 heading (smaller, italic).</summary>
+    public static TextDescriptor H4(this IContainer container, string text) => Heading(container, 4, text);
+
+    /// <summary>Adds a level-5 heading (small, bold).</summary>
+    public static TextDescriptor H5(this IContainer container, string text) => Heading(container, 5, text);
+
+    /// <summary>Adds a level-6 heading (smallest, regular).</summary>
+    public static TextDescriptor H6(this IContainer container, string text) => Heading(container, 6, text);
+
+    private static TextDescriptor Heading(this IContainer container, int level, string text)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(text);
+        if (level < 1 || level > 6) throw new ArgumentOutOfRangeException(nameof(level), "Heading level must be between 1 and 6.");
+        var heading = new HeadingElement(level, text);
+        container.Slot().Child = heading;
+        var descriptor = new TextDescriptor(heading.TextBlock);
+        // Default styles per level
+        switch (level)
+        {
+            case 1:
+                descriptor.FontSize(24).Bold();
+                break;
+            case 2:
+                descriptor.FontSize(20).Bold();
+                break;
+            case 3:
+                descriptor.FontSize(16).Bold();
+                break;
+            case 4:
+                descriptor.FontSize(14).Italic();
+                break;
+            case 5:
+                descriptor.FontSize(12).Bold();
+                break;
+            case 6:
+                descriptor.FontSize(11);
+                break;
+        }
+        return descriptor;
+    }
+
+    // -- Vector canvas ---------------------------------------------
+
+    /// <summary>
+    /// Places a fixed-height vector-graphics canvas that occupies the full available width.
+    /// Use the <see cref="VectorCanvas"/> fluent API inside <paramref name="draw"/> to render
+    /// lines, rectangles, circles, ellipses, rounded rectangles, arbitrary paths, and grids.
+    /// All coordinates inside the callback are in PDF points with a top-left origin
+    /// relative to the canvas element's bounding box.
+    /// </summary>
+    /// <param name="container">The container slot to attach the canvas to.</param>
+    /// <param name="height">Canvas height in PDF points.</param>
+    /// <param name="draw">Callback that receives a <see cref="VectorCanvas"/> and adds drawing commands.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="height"/> is zero or negative.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="draw"/> is <c>null</c>.</exception>
+    public static IContainer Canvas(this IContainer container, double height, Action<VectorCanvas> draw)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+        ArgumentNullException.ThrowIfNull(draw);
+        var canvas = new VectorCanvas();
+        draw(canvas);
+        container.Slot().Child = new CanvasElement(canvas, height);
+        return container;
+    }
+
+    // -- Internal link (GoTo) -------------------------------------
+
+    /// <summary>
+    /// Wraps child content in a clickable internal link that navigates to the specified page.
+    /// </summary>
+    /// <param name="container">The container slot to attach the link to.</param>
+    /// <param name="pageNumber">The 1-based target page number.</param>
+    /// <param name="top">Optional Y coordinate from the top of the page to position the view.</param>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="pageNumber"/> is zero or negative.</exception>
+    public static IContainer InternalLink(this IContainer container, int pageNumber, double? top = null)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageNumber);
+        var element = new InternalLinkElement { TargetPage = pageNumber, TargetTop = top };
+        return container.SetAndReturnInner(element, element.Inner);
+    }
+}
+
+/// <summary>A no-op element used as a placeholder when content is hidden.</summary>
+internal sealed class Empty : Element
+{
+    internal override ElementSize Measure(double w, double h, TextStyle? defaultStyle = null,
+        int totalPagesHint = Element.DefaultTotalPagesHint) => new(0, 0);
+    internal override void Draw(DrawingContext ctx) { }
+}

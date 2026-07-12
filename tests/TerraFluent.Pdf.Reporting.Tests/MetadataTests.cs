@@ -1,0 +1,241 @@
+using System.Text;
+using TerraFluent.Pdf.Reporting.Core;
+using TerraFluent.Pdf.Reporting.Helpers;
+using TerraFluent.Pdf.Reporting.Infra;
+using Xunit;
+
+namespace TerraFluent.Pdf.Reporting.Tests;
+
+/// <summary>
+/// Tests for document metadata (PDF Info dictionary).
+/// </summary>
+public sealed class MetadataTests
+{
+    private static byte[] Build(Action<IDocumentContainer> compose) =>
+        PdfDocument.Create(compose).PublishPdf();
+
+    private static string PdfString(byte[] bytes) =>
+        Encoding.ASCII.GetString(bytes);
+
+    [Fact]
+    public void MetadataTitleIsWrittenToInfoDictionary()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataTitle("My Document Title");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Title (My Document Title)", pdf);
+    }
+
+    [Fact]
+    public void MetadataAuthorIsWrittenToInfoDictionary()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataAuthor("John Doe");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Author (John Doe)", pdf);
+    }
+
+    [Fact]
+    public void MetadataSubjectIsWrittenToInfoDictionary()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataSubject("Test Subject");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Subject (Test Subject)", pdf);
+    }
+
+    [Fact]
+    public void MetadataKeywordsIsWrittenToInfoDictionary()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataKeywords("pdf, terra, test");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Keywords (pdf, terra, test)", pdf);
+    }
+
+    [Fact]
+    public void MetadataCreatorIsWrittenToInfoDictionary()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataCreator("MyApp 1.0");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Creator (MyApp 1.0)", pdf);
+    }
+
+    [Fact]
+    public void MultipleMetadataFieldsAreAllIncluded()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataTitle("Report 2025");
+            c.MetadataAuthor("Acme Corp");
+            c.MetadataSubject("Annual Report");
+            c.MetadataKeywords("annual;report;2025");
+            c.MetadataCreator("TerraFluent.Pdf.Reporting Generator");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Title (Report 2025)", pdf);
+        Assert.Contains("/Author (Acme Corp)", pdf);
+        Assert.Contains("/Subject (Annual Report)", pdf);
+        Assert.Contains("/Keywords (annual;report;2025)", pdf);
+        Assert.Contains("/Creator (TerraFluent.Pdf.Reporting Generator)", pdf);
+    }
+
+    [Fact]
+    public void MetadataWithoutPagesStillProducesValidPdf()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataTitle("Empty Doc");
+            c.MetadataAuthor("Test");
+            // No pages added — edge case, but PDF should still have at least one page for validity.
+            // TerraFluent.Pdf.Reporting currently allows zero pages, but Info should still be written.
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Title (Empty Doc)", pdf);
+        Assert.Contains("/Author (Test)", pdf);
+        // Basic PDF header/EOF should still be present
+        Assert.StartsWith("%PDF-", pdf);
+        Assert.EndsWith("%%EOF\n", pdf);
+    }
+
+    [Fact]
+    public void MetadataWithNullOrWhitespaceIsOmittedFromPdf()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataTitle("Valid Title");
+            c.MetadataAuthor("");           // whitespace -> ignored
+            c.MetadataSubject(null);        // null -> ignored
+            c.MetadataKeywords("   ");      // whitespace -> ignored
+            c.MetadataCreator("TerraFluent.Pdf.Reporting");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Title (Valid Title)", pdf);
+        Assert.DoesNotContain("/Author", pdf);
+        Assert.DoesNotContain("/Subject", pdf);
+        Assert.DoesNotContain("/Keywords", pdf);
+        Assert.Contains("/Creator (TerraFluent.Pdf.Reporting)", pdf);
+    }
+
+    [Fact]
+    public void InfoDictionaryIsReferencedFromTrailer()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataTitle("Test");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+
+        // The Info dictionary must be referenced from the trailer (PDF 1.7 §7.5.5) …
+        int trailerStart = pdf.IndexOf("trailer", StringComparison.Ordinal);
+        Assert.True(trailerStart >= 0, "PDF must contain a trailer");
+        string trailer = pdf[trailerStart..pdf.IndexOf("startxref", StringComparison.Ordinal)];
+        Assert.Contains("/Info ", trailer);
+
+        // … and NOT from the catalog (which has no /Info key in the spec).
+        int catalogStart = pdf.IndexOf("/Type /Catalog", StringComparison.Ordinal);
+        Assert.True(catalogStart >= 0, "PDF must contain a catalog");
+        string catalogObj = pdf[catalogStart..pdf.IndexOf(">>", catalogStart, StringComparison.Ordinal)];
+        Assert.DoesNotContain("/Info", catalogObj);
+    }
+
+    [Fact]
+    public void MetadataEscapingSpecialCharactersAreEscaped()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataTitle("Report (Final) \\ 2025");
+            c.MetadataAuthor("Smith, John");
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Hello");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Title (Report \\(Final\\) \\\\ 2025)", pdf);
+        Assert.Contains("/Author (Smith, John)", pdf);
+    }
+
+    [Fact]
+    public void MetadataWithBookmarksBothWorkTogether()
+    {
+        byte[] bytes = Build(c =>
+        {
+            c.MetadataTitle("With Bookmarks");
+            c.Bookmark("Chapter 1", 1);
+            c.Page(p =>
+            {
+                p.Size(PageSize.A4);
+                p.Content().Text("Page 1");
+            });
+        });
+
+        string pdf = PdfString(bytes);
+        Assert.Contains("/Title (With Bookmarks)", pdf);
+        Assert.Contains("/Outlines", pdf);
+        Assert.Contains("/Info ", pdf);
+        Assert.Contains("/Catalog", pdf);
+    }
+}

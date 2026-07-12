@@ -1,0 +1,88 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Support .NET 8 (LTS), .NET 9 (STS) and .NET 10 (current LTS) -->
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+
+    <!-- Quality gates -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Suppress missing-XML-doc warnings on intentionally internal/private members -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- Reproducible / deterministic build -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
+     <!-- ── NuGet package identity ───────────────────────────────────────── -->
+     <PackageId>TerraFluent.Pdf.Reporting</PackageId>
+     <AssemblyName>TerraFluent.Pdf.Reporting</AssemblyName>
+     <RootNamespace>TerraFluent.Pdf.Reporting</RootNamespace>
+      <Version>2.0.0</Version>
+      <Authors>Saheb Ansari</Authors>
+      <Copyright>Copyright © 2025-2026 TerraFluent.Pdf.Reporting Contributors</Copyright>
+      <PackageProjectUrl>https://github.com/sahebansari/TerraFluent.Pdf.Reporting</PackageProjectUrl>
+     <Description>
+       A free, open-source (MIT) C# PDF library for .NET — generate PDF documents
+       (invoices, reports, receipts, labels, certificates) from code with a fluent,
+       composable API. Lightweight, zero-dependency, and pure managed C#: no native
+       binaries, no HTML-to-PDF browser engine, free for commercial use. Features
+       include rich text styling (bold, italic, underline, strikethrough, custom
+       line-height), multi-span mixed formatting, Column / Row / Table layouts,
+       PNG and JPEG image embedding, rounded and per-edge borders, explicit page
+       breaks, clickable hyperlink annotations, headers, footers, page numbers,
+       AES-256 encryption, Code128 barcodes, QR codes (ISO/IEC 18004), and a full
+       Material Design colour palette. Runs on Windows, Linux, macOS, Docker,
+       Azure, and AWS on .NET 8, 9, and 10.
+     </Description>
+     <PackageTags>pdf;pdf-generation;pdf-library;create-pdf;generate-pdf;pdf-writer;pdf-creator;free;open-source;mit;document;reporting;report;fluent-api;invoice;invoice-generator;table;image;barcode;qrcode;qr-code;code128;encryption;aes-256;no-dependency;zero-dependency;cross-platform;linux;docker;aspnetcore;dotnet;csharp</PackageTags>
+     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+     <PackageReadmeFile>README.md</PackageReadmeFile>
+     <PackageReleaseNotes>https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/CHANGELOG.md</PackageReleaseNotes>
+
+     <!-- ── Source Link / reproducible build ────────────────────────────── -->
+     <RepositoryUrl>https://github.com/sahebansari/TerraFluent.Pdf.Reporting</RepositoryUrl>
+     <RepositoryType>git</RepositoryType>
+     <PublishRepositoryUrl>false</PublishRepositoryUrl>
+     <EmbedUntrackedSources>false</EmbedUntrackedSources>
+     <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
+     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
+     <DebugType>portable</DebugType>
+     <IncludeSymbols>false</IncludeSymbols>
+     <Publish>false</Publish>
+     <EnableSourceLink>false</EnableSourceLink>
+     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+      <Title>TerraFluent.Pdf.Reporting — PDF Reporting Library for .NET</Title>
+      <PackageIcon>icon.png</PackageIcon>
+       <AssemblyVersion>2.0.0</AssemblyVersion>
+       <FileVersion>2.0.0</FileVersion>
+  </PropertyGroup>
+
+  <!-- Bundle the README into the NuGet package -->
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- Source Link — maps PDB paths back to GitHub source for debugger step-in -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Allow unit-test project to access internal APIs -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>TerraFluent.Pdf.Reporting.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+    <ItemGroup>
+      <None Include="icon.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <Pack>True</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
+    </ItemGroup>
+
+</Project>
+
