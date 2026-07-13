@@ -4,9 +4,18 @@
 # The release tag MUST follow semantic versioning with a "v" prefix (e.g. v1.2.0)
 # and MUST match the <Version> in src/TerraFluent.Pdf.Reporting/TerraFluent.Pdf.Reporting.csproj.
 #
-# Required GitHub repository secret:
-#   NUGET_API_KEY  - your nuget.org API key
-#                    (Settings -> Secrets and variables -> Actions -> New repository secret)
+# Authentication: NuGet.org Trusted Publishing (OIDC) — no long-lived API key.
+# The NuGet/login action exchanges this workflow's GitHub OIDC token for a
+# short-lived nuget.org API key, so no NUGET_API_KEY secret is stored.
+#
+# One-time setup:
+#   1. On nuget.org: your account -> Trusted Publishing -> Add
+#      - Repository owner : sahebansari
+#      - Repository       : TerraFluent.Pdf.Reporting
+#      - Workflow file    : publish.yml
+#   2. On GitHub: Settings -> Secrets and variables -> Actions -> Variables
+#      - Add repository variable NUGET_USER = your nuget.org username
+#        (the account/organization that owns the trusted publishing policy)
 #
 # How to release (full checklist):
 #   1. Bump <Version> in src/TerraFluent.Pdf.Reporting/TerraFluent.Pdf.Reporting.csproj        (e.g. 1.2.0)
@@ -23,6 +32,10 @@ name: Publish NuGet
 on:
   release:
     types: [ published ]
+
+permissions:
+  contents: read
+  id-token: write   # required to mint the OIDC token for NuGet Trusted Publishing
 
 jobs:
   publish:
@@ -80,16 +93,24 @@ jobs:
           name: nuget-packages-${{ github.ref_name }}
           path: ./artifacts/
 
+      # Exchange the workflow's GitHub OIDC token for a short-lived nuget.org
+      # API key via the Trusted Publishing policy configured on nuget.org.
+      - name: NuGet login (Trusted Publishing)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
       - name: Push .nupkg to nuget.org
         run: |
           dotnet nuget push ./artifacts/*.nupkg \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
 
       - name: Push .snupkg symbols to nuget.org
         run: |
           dotnet nuget push ./artifacts/*.snupkg \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
