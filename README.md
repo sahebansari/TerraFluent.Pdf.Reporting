@@ -8,11 +8,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 📚 **To know more about it and documentation and sample codes. Please visit its website** 
-[https://terrafluent.dev/](https://terrafluent.dev/)
 
+🌐 [https://terrafluent.dev/](https://terrafluent.dev/)
 
-> **New in 1.5.0:** 
-Code128 barcodes and QR codes (ISO/IEC 18004, versions 1-40, all four error correction levels) via `container.Barcode(...)` and `container.QrCode(...)` — rendered as vector-filled rectangles, no raster image pipeline, placeable anywhere a `Column`, `Row`, or `Table` cell can go.
 
 **TerraFluent.Pdf.Reporting** is a lightweight, zero-dependency, pure C# library for generating professional PDF 1.7 documents programmatically.
 It provides a fluent, composable API that covers the full document-authoring lifecycle — from page layout and
@@ -80,6 +78,16 @@ runtime packages, and no licensing restrictions.
 ```sh
 dotnet add package TerraFluent.Pdf.Reporting
 ```
+
+### Migrating from TerraPDF
+
+TerraFluent.Pdf.Reporting 2.0.0 is the direct continuation of TerraPDF 1.x. To upgrade:
+
+1. Replace the `TerraPDF` package reference with `TerraFluent.Pdf.Reporting`.
+2. Update `using TerraPDF.*` directives to `using TerraFluent.Pdf.Reporting.*`.
+3. Replace `Document.Create(...)` with `PdfDocument.Create(...)`.
+
+No other API or behaviour changes are required — see the [CHANGELOG](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/CHANGELOG.md) for details.
 
 ---
 
