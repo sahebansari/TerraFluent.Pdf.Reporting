@@ -6,7 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.0] - 2026-07-12
+## [2.0.1] - 2026-07-13
+
+### Changed
+- Version bump only — identical to 2.0.0, which was never published: its
+  release workflow failed on authentication, and the `v2.0.0` tag was
+  consumed by GitHub's immutable-release protection and cannot be reused.
+  No code changes.
+
+---
+
+## [2.0.0] - 2026-07-12 (not published)
 
 ### Changed (breaking — rebrand)
 - **Package renamed from `TerraPDF` to `TerraFluent.Pdf.Reporting`** — the

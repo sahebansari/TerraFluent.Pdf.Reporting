@@ -81,7 +81,7 @@ dotnet add package TerraFluent.Pdf.Reporting
 
 ### Migrating from TerraPDF
 
-TerraFluent.Pdf.Reporting 2.0.0 is the direct continuation of TerraPDF 1.x. To upgrade:
+TerraFluent.Pdf.Reporting 2.x is the direct continuation of TerraPDF 1.x. To upgrade:
 
 1. Replace the `TerraPDF` package reference with `TerraFluent.Pdf.Reporting`.
 2. Update `using TerraPDF.*` directives to `using TerraFluent.Pdf.Reporting.*`.
