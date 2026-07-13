@@ -18,7 +18,7 @@
      <PackageId>TerraFluent.Pdf.Reporting</PackageId>
      <AssemblyName>TerraFluent.Pdf.Reporting</AssemblyName>
      <RootNamespace>TerraFluent.Pdf.Reporting</RootNamespace>
-      <Version>2.0.1</Version>
+      <Version>2.0.2</Version>
       <Authors>Saheb Ansari</Authors>
       <Copyright>Copyright © 2025-2026 TerraFluent.Pdf.Reporting Contributors</Copyright>
       <PackageProjectUrl>https://github.com/sahebansari/TerraFluent.Pdf.Reporting</PackageProjectUrl>
@@ -56,8 +56,8 @@
      <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
       <Title>TerraFluent.Pdf.Reporting — PDF Reporting Library for .NET</Title>
       <PackageIcon>icon.png</PackageIcon>
-       <AssemblyVersion>2.0.1</AssemblyVersion>
-       <FileVersion>2.0.1</FileVersion>
+       <AssemblyVersion>2.0.2</AssemblyVersion>
+       <FileVersion>2.0.2</FileVersion>
   </PropertyGroup>
 
   <!-- Bundle the README into the NuGet package -->

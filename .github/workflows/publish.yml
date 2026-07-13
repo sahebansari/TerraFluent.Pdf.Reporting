@@ -13,9 +13,12 @@
 #      - Repository owner : sahebansari
 #      - Repository       : TerraFluent.Pdf.Reporting
 #      - Workflow file    : publish.yml
-#   2. On GitHub: Settings -> Secrets and variables -> Actions -> Variables
-#      - Add repository variable NUGET_USER = your nuget.org username
+#   2. On GitHub: Settings -> Secrets and variables -> Actions -> Secrets
+#      - Add repository secret NUGET_USER = your nuget.org username
 #        (the account/organization that owns the trusted publishing policy)
+#   3. Verify the setup: Actions -> Publish NuGet -> Run workflow
+#      - Runs the auth-test job only: performs the OIDC login against
+#        nuget.org and stops. Nothing is packed or published.
 #
 # How to release (full checklist):
 #   1. Bump <Version> in src/TerraFluent.Pdf.Reporting/TerraFluent.Pdf.Reporting.csproj        (e.g. 1.2.0)
@@ -32,14 +35,37 @@ name: Publish NuGet
 on:
   release:
     types: [ published ]
+  # Manual trigger: runs ONLY the auth-test job below — verifies the
+  # Trusted Publishing setup end-to-end without packing or pushing anything.
+  workflow_dispatch:
 
 permissions:
   contents: read
   id-token: write   # required to mint the OIDC token for NuGet Trusted Publishing
 
 jobs:
+  # Dry-run authentication check (Actions -> Publish NuGet -> Run workflow).
+  # Exchanges this workflow's OIDC token for a temporary nuget.org API key via
+  # the Trusted Publishing policy — the exact same exchange the publish job
+  # performs — then discards it. Succeeds only if the policy on nuget.org and
+  # the NUGET_USER repository variable are both configured correctly.
+  auth-test:
+    name: Test nuget.org authentication
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: NuGet login (Trusted Publishing)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Confirm
+        run: echo "Trusted Publishing authentication succeeded — temporary API key issued (and discarded)."
+
   publish:
     name: Pack & Push
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
 
     steps:

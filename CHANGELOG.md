@@ -6,7 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.1] - 2026-07-13
+## [2.0.2] - 2026-07-13
+
+### Changed
+- Version bump only — no library code changes. Supersedes 2.0.1 and 2.0.0,
+  neither of which reached nuget.org: their release workflows failed on
+  authentication, and the `v2.0.0`/`v2.0.1` tags were consumed by GitHub's
+  immutable-release protection and cannot be reused. The publish workflow now
+  uses NuGet Trusted Publishing (OIDC) and has a manual auth-test dry run to
+  verify credentials before releasing.
+
+---
+
+## [2.0.1] - 2026-07-13 (not published)
 
 ### Changed
 - Version bump only — identical to 2.0.0, which was never published: its
