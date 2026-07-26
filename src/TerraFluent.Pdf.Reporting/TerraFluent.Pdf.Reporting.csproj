@@ -18,10 +18,10 @@
      <PackageId>TerraFluent.Pdf.Reporting</PackageId>
      <AssemblyName>TerraFluent.Pdf.Reporting</AssemblyName>
      <RootNamespace>TerraFluent.Pdf.Reporting</RootNamespace>
-      <Version>2.0.2</Version>
+      <Version>2.0.3</Version>
       <Authors>Saheb Ansari</Authors>
       <Copyright>Copyright © 2025-2026 TerraFluent.Pdf.Reporting Contributors</Copyright>
-      <PackageProjectUrl>https://github.com/sahebansari/TerraFluent.Pdf.Reporting</PackageProjectUrl>
+      <PackageProjectUrl>https://terrafluent.dev/pdf/</PackageProjectUrl>
      <Description>
        A free, open-source (MIT) C# PDF library for .NET — generate PDF documents
        (invoices, reports, receipts, labels, certificates) from code with a fluent,
@@ -39,25 +39,21 @@
      <PackageLicenseExpression>MIT</PackageLicenseExpression>
      <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
      <PackageReadmeFile>README.md</PackageReadmeFile>
-     <PackageReleaseNotes>https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/CHANGELOG.md</PackageReleaseNotes>
+     <PackageReleaseNotes>https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/CHANGELOG.md</PackageReleaseNotes>
 
-     <!-- ── Source Link / reproducible build ────────────────────────────── -->
+     <!-- ── Source Link / symbol package ─────────────────────────────────── -->
      <RepositoryUrl>https://github.com/sahebansari/TerraFluent.Pdf.Reporting</RepositoryUrl>
      <RepositoryType>git</RepositoryType>
-     <PublishRepositoryUrl>false</PublishRepositoryUrl>
-     <EmbedUntrackedSources>false</EmbedUntrackedSources>
-     <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
-     <ContinuousIntegrationBuild>false</ContinuousIntegrationBuild>
+     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+     <EmbedUntrackedSources>true</EmbedUntrackedSources>
      <DebugType>portable</DebugType>
-     <IncludeSymbols>false</IncludeSymbols>
-     <Publish>false</Publish>
-     <EnableSourceLink>false</EnableSourceLink>
+     <IncludeSymbols>true</IncludeSymbols>
      <SymbolPackageFormat>snupkg</SymbolPackageFormat>
      <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
       <Title>TerraFluent.Pdf.Reporting — PDF Reporting Library for .NET</Title>
       <PackageIcon>icon.png</PackageIcon>
-       <AssemblyVersion>2.0.2</AssemblyVersion>
-       <FileVersion>2.0.2</FileVersion>
+       <AssemblyVersion>2.0.3</AssemblyVersion>
+       <FileVersion>2.0.3</FileVersion>
   </PropertyGroup>
 
   <!-- Bundle the README into the NuGet package -->

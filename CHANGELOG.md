@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.3] - 2026-07-13
+
+### Changed
+- Symbol packages (`.snupkg`) are now generated and published alongside the
+  main package, with Source Link enabled (`PublishRepositoryUrl`,
+  `EmbedUntrackedSources`), so consumers can step into library source while
+  debugging. 2.0.2 and earlier shipped without symbols.
+
+---
+
 ## [2.0.2] - 2026-07-13
 
 ### Changed
