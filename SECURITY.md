@@ -4,7 +4,8 @@
 
 | Version | Supported |
 |---------|-----------|
-| 1.x (latest) | ✅ Active |
+| 2.x (latest) | ✅ Active |
+| 1.x | ❌ No longer supported |
 | < 1.0 | ❌ No longer supported |
 
 We always recommend using the latest published version on

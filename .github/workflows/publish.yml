@@ -48,7 +48,7 @@ jobs:
   # Exchanges this workflow's OIDC token for a temporary nuget.org API key via
   # the Trusted Publishing policy — the exact same exchange the publish job
   # performs — then discards it. Succeeds only if the policy on nuget.org and
-  # the NUGET_USER repository variable are both configured correctly.
+  # the NUGET_USER repository secret are both configured correctly.
   auth-test:
     name: Test nuget.org authentication
     if: github.event_name == 'workflow_dispatch'
