@@ -38,9 +38,13 @@ The following are **out of scope**:
 
 **Please do not file public GitHub Issues for security vulnerabilities.**
 
-Report security issues by emailing:
+Report security issues privately through GitHub's private vulnerability
+reporting:
 
-> **security@terrafluent.example**
+> **[Report a vulnerability](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/security/advisories/new)**
+
+This opens a private advisory visible only to you and the maintainers. See also
+the [TerraFluent security page](https://terrafluent.dev/security/).
 
 Include in your report:
 
@@ -69,4 +73,5 @@ We can communicate in **English**.
 ## Acknowledgements
 
 We publicly credit reporters of confirmed vulnerabilities in the
-[CHANGELOG](CHANGELOG.md) unless they prefer to remain anonymous.
+[CHANGELOG](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/CHANGELOG.md)
+unless they prefer to remain anonymous.

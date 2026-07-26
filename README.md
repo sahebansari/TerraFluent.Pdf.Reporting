@@ -2,10 +2,12 @@
 
 **A free, open-source (MIT) C# PDF library for creating PDF documents in .NET** — generate invoices, reports, receipts, statements, labels, and certificates from C# code with a fluent API. 100% managed C#, zero dependencies, and free for personal **and commercial** use: no watermarks, no page limits, no paid tiers.
 
-![TerraFluent.Pdf.Reporting](https://raw.githubusercontent.com/sahebansari/TerraFluent.Pdf.Reporting/master/logo.png)
+![TerraFluent.Pdf.Reporting](https://raw.githubusercontent.com/sahebansari/TerraFluent.Pdf.Reporting/main/logo.png)
 
 [![NuGet](https://img.shields.io/nuget/v/TerraFluent.Pdf.Reporting.svg)](https://www.nuget.org/packages/TerraFluent.Pdf.Reporting)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/LICENSE)
+[![CI](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/actions/workflows/ci.yml/badge.svg)](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/actions/workflows/ci.yml)
+[![NuGet downloads](https://img.shields.io/nuget/dt/TerraFluent.Pdf.Reporting.svg)](https://www.nuget.org/packages/TerraFluent.Pdf.Reporting)
 
 📚 **To know more about it and documentation and sample codes. Please visit its website** 
 
@@ -87,7 +89,7 @@ TerraFluent.Pdf.Reporting 2.x is the direct continuation of TerraPDF 1.x. To upg
 2. Update `using TerraPDF.*` directives to `using TerraFluent.Pdf.Reporting.*`.
 3. Replace `Document.Create(...)` with `PdfDocument.Create(...)`.
 
-No other API or behaviour changes are required — see the [CHANGELOG](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/CHANGELOG.md) for details.
+No other API or behaviour changes are required — see the [CHANGELOG](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/CHANGELOG.md) for details.
 
 ---
 
@@ -141,31 +143,31 @@ PdfDocument.Create(container =>
 
 ## Full Documentation
 
-For complete API reference and detailed guides, visit the [docs](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/tree/master/docs/) directory:
+For complete API reference and detailed guides, visit the [docs](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/tree/main/docs/) directory:
 
-- **[Getting Started](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/getting-started.md)** — Installation, Quick Start, and basic usage
-- **[Text & Spans](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/text-and-spans.md)** — Single-span and multi-span text, styling, page numbers
-- **[Layout](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/layout.md)** — Column, Row, and Table layouts with alignment and spacing
-- **[Row and Column Layout](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/row-and-column-layout.md)** — Detailed Row and Column layout examples
-- **[Decorators](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/decorators.md)** — Padding, margin, backgrounds, borders, and styling
-- **[Images](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/images.md)** — PNG and JPEG embedding with sizing and alignment
-- **[Page Sizes & Units](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/page-sizes-and-units.md)** — Built-in page sizes and unit conversions
-- **[Colors](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/colors.md)** — Material Design color palette with shades
-- **[Encryption & Security](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/encryption.md)** — AES-256 by default, with AES-128 compatibility mode and permission flags
-- **[Vector Graphics](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/vector-graphics.md)** — Canvas API, shapes, paths, grids, and charts
-- **[Table of Contents](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/table-of-contents.md)** — Automatic TOC generation from headings
-- **[Bookmarks](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/bookmarks.md)** — PDF bookmarks and outlines
-- **[Components & Templates](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/components-and-templates.md)** — Reusable components and document templates
-- **[Metadata](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/metadata.md)** — Document metadata (Title, Author, Subject, Keywords, Creator)
-- **[Unicode & Character Encoding](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/docs/unicode-and-encoding.md)** — WinAnsiEncoding and character coverage
-- **[Samples](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/tree/master/samples)** — Complete working examples demonstrating all features
+- **[Getting Started](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/getting-started.md)** — Installation, Quick Start, and basic usage
+- **[Text & Spans](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/text-and-spans.md)** — Single-span and multi-span text, styling, page numbers
+- **[Layout](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/layout.md)** — Column, Row, and Table layouts with alignment and spacing
+- **[Row and Column Layout](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/row-and-column-layout.md)** — Detailed Row and Column layout examples
+- **[Decorators](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/decorators.md)** — Padding, margin, backgrounds, borders, and styling
+- **[Images](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/images.md)** — PNG and JPEG embedding with sizing and alignment
+- **[Page Sizes & Units](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/page-sizes-and-units.md)** — Built-in page sizes and unit conversions
+- **[Colors](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/colors.md)** — Material Design color palette with shades
+- **[Encryption & Security](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/encryption.md)** — AES-256 by default, with AES-128 compatibility mode and permission flags
+- **[Vector Graphics](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/vector-graphics.md)** — Canvas API, shapes, paths, grids, and charts
+- **[Table of Contents](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/table-of-contents.md)** — Automatic TOC generation from headings
+- **[Bookmarks](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/bookmarks.md)** — PDF bookmarks and outlines
+- **[Components & Templates](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/components-and-templates.md)** — Reusable components and document templates
+- **[Metadata](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/metadata.md)** — Document metadata (Title, Author, Subject, Keywords, Creator)
+- **[Unicode & Character Encoding](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/docs/unicode-and-encoding.md)** — WinAnsiEncoding and character coverage
+- **[Samples](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/tree/main/samples)** — Complete working examples demonstrating all features
 
 ---
 
 ## FAQ
 
 **Is TerraFluent.Pdf.Reporting really free for commercial use?**
-Yes. TerraFluent.Pdf.Reporting is released under the [MIT license](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/LICENSE) — you can use it in closed-source and commercial products at no cost, with no revenue caps, royalties, watermarks, or feature-limited tiers.
+Yes. TerraFluent.Pdf.Reporting is released under the [MIT license](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/LICENSE) — you can use it in closed-source and commercial products at no cost, with no revenue caps, royalties, watermarks, or feature-limited tiers.
 
 **How does TerraFluent.Pdf.Reporting compare to iTextSharp, QuestPDF, or PDFsharp?**
 iText (iTextSharp) is AGPL-licensed, which requires a commercial license for most closed-source use. QuestPDF's Community license is free only below a company-revenue threshold. PDFsharp is MIT like TerraFluent.Pdf.Reporting, but uses an imperative drawing model. TerraFluent.Pdf.Reporting offers a fluent, composable, code-first API under a plain MIT license with zero runtime dependencies.
@@ -197,22 +199,22 @@ runtimes to execute the full multi-framework test suite.
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/CONTRIBUTING.md) for coding standards, project structure, how to run tests, and the pull-request process.
+Contributions are welcome! Please read [CONTRIBUTING.md](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/CONTRIBUTING.md) for coding standards, project structure, how to run tests, and the pull-request process.
 
 ---
 
 ## Changelog
 
-All notable changes are documented in [CHANGELOG.md](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/CHANGELOG.md), following the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
+All notable changes are documented in [CHANGELOG.md](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/CHANGELOG.md), following the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 
 ---
 
 ## Security
 
-To report a vulnerability, please follow the responsible-disclosure process described in [SECURITY.md](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/SECURITY.md). **Do not open a public issue for security problems.**
+To report a vulnerability, please follow the responsible-disclosure process described in [SECURITY.md](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/SECURITY.md). **Do not open a public issue for security problems.**
 
 ---
 
 ## License
 
-MIT — see [LICENSE](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/master/LICENSE) for details.
+MIT — see [LICENSE](https://github.com/sahebansari/TerraFluent.Pdf.Reporting/blob/main/LICENSE) for details.
