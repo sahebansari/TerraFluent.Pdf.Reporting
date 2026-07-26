@@ -72,7 +72,7 @@ TerraFluent.Pdf.Reporting/
 
 ## Making Changes
 
-1. **Fork** the repository and create a branch from `master`:
+1. **Fork** the repository and create a branch from `main`:
    ```sh
    git checkout -b feature/my-feature
    ```
@@ -87,7 +87,7 @@ TerraFluent.Pdf.Reporting/
    dotnet test -c Release
    ```
 
-5. Open a Pull Request against `master`.
+5. Open a Pull Request against `main`.
 
 ---
 
@@ -168,7 +168,7 @@ label `enhancement`. Describe the use-case, not just the solution.
 
 1. Bump `<Version>` in `src/TerraFluent.Pdf.Reporting/TerraFluent.Pdf.Reporting.csproj`.
 2. Update `CHANGELOG.md` — move items from `[Unreleased]` to a new versioned section.
-3. Commit and push to `master`.
+3. Commit and push to `main`.
 4. Create a **GitHub Release** with a tag matching the version (e.g. `v1.1.0`).
    - The `publish.yml` workflow automatically packs and pushes the `.nupkg`
      and `.snupkg` (symbols) to nuget.org.
