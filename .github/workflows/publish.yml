@@ -1,4 +1,4 @@
-﻿# Publishes the TerraFluent.Pdf.Reporting NuGet package to nuget.org.
+# Publishes the TerraFluent.Pdf.Reporting NuGet package to nuget.org.
 #
 # Triggered automatically when a GitHub Release is published.
 # The release tag MUST follow semantic versioning with a "v" prefix (e.g. v1.2.0)
@@ -70,7 +70,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0       # full history required for source-link
 
